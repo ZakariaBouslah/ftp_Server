@@ -2,17 +2,22 @@
 #include "ftpServerOps.h"
 void sendfile(int clientfd){
     char* filename;
-    Rio_readn(clientfd, filename, MAXBUF);
+    if((rio_readn(clientfd, filename, MAXBUF)) <=0){
+        perror("Server filename read error");
+    }
     int fd = Open(filename,O_RDONLY,S_IRUSR|S_IWUSR);
     struct stat fileinfo;
     fstat(fd, &fileinfo); 
-    char* file_buffer = malloc(fileinfo.st_size);
-    Rio_writen(clientfd, &fileinfo.st_size,sizeof(fileinfo.st_size));
-    if(rio_readn(fd, file_buffer, fileinfo.st_size) <= 0){
-        perror("Reading Error");
+    int filesize = fileinfo.st_size;
+    char* file_buffer = malloc(filesize);
+    if((rio_writen(clientfd, &filesize,MAXBUF))<=0){
+        perror("Server filesize writing error");
+    }
+    if(rio_readn(fd, file_buffer, filesize) <= 0){
+        perror("Server reading file Error");
     }
     if(rio_writen(clientfd, file_buffer, fileinfo.st_size)<=0){
-        perror("Writing Error");
+        perror("Server writing file Error");
     }
 
 }
