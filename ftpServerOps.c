@@ -1,5 +1,6 @@
 #include "csapp.h"
 #include "ftpServerOps.h"
+#include <string.h>
 void sendfile(int clientfd){
 
 
@@ -9,16 +10,17 @@ void sendfile(int clientfd){
         perror("Server filename_size read error");
     }
 
-
+    
 
     char* filename=malloc(filename_size);
     if((rio_readn(clientfd, filename, filename_size)) <=0){
         perror("Server filename read error");
     }
 
-
+    printf("the client asked for the file named : %s\n",filename);
 
     int fd = Open(filename,O_RDONLY,S_IRUSR|S_IWUSR);
+
     struct stat fileinfo;
     fstat(fd, &fileinfo); 
     int filesize = (int) fileinfo.st_size;
