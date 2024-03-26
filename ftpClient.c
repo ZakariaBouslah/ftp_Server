@@ -19,7 +19,6 @@ int main(int argc, char **argv){
     printf("client connected to server OS\n"); 
     char filename[MAX_BUF];
     scanf("%s",filename);
-    printf("%s\n", filename);
     recieve_file(filename, clientfd);
     Close(clientfd);
 }

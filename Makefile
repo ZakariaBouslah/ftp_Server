@@ -28,7 +28,7 @@ all: $(PROGS)
 	$(CC) $(CFLAGS) $(INCLDIR) -c -o $@ $<
 	
 %: %.o $(OBJS)
-	$(CC) -o $@ $(LDFLAGS) $^ $(LIBS)
+	$(CC) -o $@dir/$@ $(LDFLAGS) $^ $(LIBS)
 #	$(CC) -o $@ $(LDFLAGS) $(LIBS) $^
 	
 clean:
