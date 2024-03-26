@@ -1,7 +1,7 @@
 #include "csapp.h"
 #include "ftpServerOps.h"
 #define MAX_NAME_LEN 256
-#define NB_PROC 2
+#define NB_PROC 10
 #define PORT 2121
 pid_t tableau_fils[NB_PROC];
 
@@ -14,10 +14,10 @@ void SIGCHLD_handler(int sig){
     }
 }
 void SIGINT_handler(int sig){
-    Signal(SIGCHLD,SIG_DFL);
+    Signal(SIGCHLD,SIG_IGN);
     for (size_t i = 0; i < NB_PROC; i++){
         kill(tableau_fils[i], SIGINT); 
-        while(waitpid(tableau_fils[i], NULL, 0)>=0)
+        while(waitpid(tableau_fils[i], NULL, 0)==0)
             sleep(1);   
     }
     printf("\nEverything closed, Goodbye World\n");

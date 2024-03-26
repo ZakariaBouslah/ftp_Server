@@ -32,13 +32,13 @@ void recieve_file(char* filename, int clientfd){
 
     char *newfilename = malloc(strlen(filename) + strlen("_ClientCopy") + 1);
     
-    strcat(newfilename, "clientCopy_");
-    strcpy(newfilename, filename);
+    strcpy(newfilename, "clientCopy_");
+    strcat(newfilename, filename);
 
     int fd =Open(newfilename,O_CREAT|O_WRONLY,S_IRUSR|S_IWUSR);
     if((rio_writen(fd, file_buffer, filesize))<=0){
         perror("Client writing file error");
     }
-    printf("file %s was recieved in %s",filename,newfilename);
+    printf("file %s was recieved in %s\n",filename,newfilename);
     Close(fd);
 }
