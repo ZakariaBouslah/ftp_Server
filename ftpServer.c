@@ -2,7 +2,7 @@
 #include "ftpServerOps.h"
 #define MAX_NAME_LEN 256
 #define NB_PROC 2
-#define PORT 2121
+#define PORT 2120
 pid_t tableau_fils[NB_PROC];
 
 int listenfd, connfd;
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     char client_hostname[MAX_NAME_LEN];
     
     
-    listenfd = Open_listenfd((PORT));
+    listenfd = Open_listenfd(PORT);
     
     pid_t pid_pere = getpid();
 

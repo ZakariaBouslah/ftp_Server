@@ -5,24 +5,28 @@
 void recieve_file(char* filename, int clientfd){
 
 
-
+    printf("SLAY\n");
     int filename_size = strlen(filename);
     if ((rio_writen(clientfd,&filename_size,sizeof(int)))<=0){
         perror("Client writing filename_size error");
         exit(1);
     }
-
+    printf("i send the size of the name,%d\n",filename_size);
 
     if ((rio_writen(clientfd,filename,filename_size))<=0){
         perror("Client writing filename error");
         exit(1);
     }
+    printf("i send the  name,%s\n",filename);
 
     int exist_flag;
+    if (Rio_readn(clientfd, &exist_flag, sizeof(int)) <= 0) {
+        perror("Client reading exist_flag Error");
+        exit(1);
+    }
+    printf("i got the exist flag%d\n",exist_flag);
 
-    Rio_readn(clientfd,&exist_flag,sizeof(int));
-
-    if(!exist_flag){
+    if (!exist_flag) {
         printf("File requested doesn't exist\n");
         exit(1);
     }

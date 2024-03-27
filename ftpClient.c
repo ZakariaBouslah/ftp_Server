@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ftpClientOps.h"
-#define PORT 2121
+#define PORT 2120
 #define MAX_BUF 256 
 
 int main(int argc, char **argv){
@@ -18,8 +18,28 @@ int main(int argc, char **argv){
     clientfd = Open_clientfd(host, PORT);
     printf("client connected to server OS\n"); 
     char filename[MAX_BUF];
-    scanf("%s",filename);
-    recieve_file(filename, clientfd);
-    Close(clientfd);
+    char command[4];
+    while(1){
+        scanf("%s",command);
+        printf("command : %s\n",command);
+        
+        
+
+        if (strcmp(command,"get")==0){
+            scanf("%s",filename);
+            printf("filename :%s.\n",filename);
+            recieve_file(filename, clientfd);
+        }
+        else if(strcmp(command,"bye")==0){
+            printf("client is done\n");
+            Close(clientfd);
+            break;
+        }
+        else{
+             printf("unknown command\n");
+        }
+    }
+    
+    
 }
 

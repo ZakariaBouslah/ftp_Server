@@ -1,11 +1,11 @@
 #include "csapp.h"
 #include "ftpServerOps.h"
 #include <string.h>
-#define SERV_DIR "./ftpServerdir/"
+
 
 void sendfile(int clientfd){
 
-
+    printf("SLAYYYYYYYYY\n");
     char* filename=NULL;
     char* file_buffer=NULL;
 
@@ -15,9 +15,7 @@ void sendfile(int clientfd){
         goto error;
     }
 
-    char* absolute_path;    
-    strcpy(absolute_path,SERV_DIR);
-    filename=malloc(filename_size+strlen(absolute_path)+1);
+
     if((rio_readn(clientfd, filename, filename_size)) <=0){
         perror("Server filename read error");
         goto error;
@@ -25,10 +23,6 @@ void sendfile(int clientfd){
 
     printf("the client requested file: %s\n",filename);
 
-    
-    printf("%s\n",absolute_path);
-    strcat(absolute_path,filename);
-    strcpy(filename,absolute_path);
     int fd,exist_flag;
     if( fd = open(filename,O_RDONLY,S_IRUSR|S_IWUSR)<=0){
         perror("No such file in directory");
