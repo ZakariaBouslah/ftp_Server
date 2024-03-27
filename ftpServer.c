@@ -14,10 +14,11 @@ void SIGCHLD_handler(int sig){
     }
 }
 void SIGINT_handler(int sig){
-    Signal(SIGCHLD,SIG_DFL);
+    Signal(SIGCHLD,SIG_IGN);
+    close(listenfd);
     for (size_t i = 0; i < NB_PROC; i++){
         kill(tableau_fils[i], SIGINT); 
-        while(waitpid(tableau_fils[i], NULL, 0)>=0)
+        while(waitpid(tableau_fils[i], NULL, 0)==0)
             sleep(1);   
     }
     printf("\nEverything closed, Goodbye World\n");
@@ -25,9 +26,11 @@ void SIGINT_handler(int sig){
 }
 
 void child_SIGINT_handler(int sig){
-    Close(listenfd);
+    close(listenfd);
     if(connfd != -1)
-        Close(connfd);
+        printf("\nClosing children socket\n");
+        connfd = -1;
+        close(connfd);
     exit(0);
 }
 
@@ -69,7 +72,6 @@ int main(int argc, char **argv)
     if(getpid()==pid_pere){
         Signal(SIGCHLD, SIGCHLD_handler);
         Signal(SIGINT, SIGINT_handler);
-        Close(listenfd);
         pause();
         
     }
@@ -77,12 +79,10 @@ int main(int argc, char **argv)
         
         Signal(SIGINT, child_SIGINT_handler);
         while (1) {
-
-            
             while((connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen))<0);
             printf("server connected to client\n");
             sendfile(connfd);
-            Close(connfd);
+            connfd = -1;
         }
     }
 
