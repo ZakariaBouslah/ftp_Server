@@ -1,8 +1,8 @@
 #include "csapp.h"
 #include "ftpServerOps.h"
 #define MAX_NAME_LEN 256
-#define NB_PROC 10
-#define PORT 2121
+#define NB_PROC 2
+#define PORT 2120
 pid_t tableau_fils[NB_PROC];
 
 int listenfd, connfd;
@@ -15,6 +15,7 @@ void SIGCHLD_handler(int sig){
 }
 void SIGINT_handler(int sig){
     Signal(SIGCHLD,SIG_IGN);
+    close(listenfd);
     for (size_t i = 0; i < NB_PROC; i++){
         kill(tableau_fils[i], SIGINT); 
         while(waitpid(tableau_fils[i], NULL, 0)==0)
@@ -25,9 +26,11 @@ void SIGINT_handler(int sig){
 }
 
 void child_SIGINT_handler(int sig){
-    Close(listenfd);
+    close(listenfd);
     if(connfd != -1)
-        Close(connfd);
+        printf("\nClosing children socket\n");
+        connfd = -1;
+        close(connfd);
     exit(0);
 }
 
@@ -59,7 +62,7 @@ int main(int argc, char **argv)
     char client_hostname[MAX_NAME_LEN];
     
     
-    listenfd = Open_listenfd((PORT));
+    listenfd = Open_listenfd(PORT);
     
     pid_t pid_pere = getpid();
 
@@ -69,7 +72,6 @@ int main(int argc, char **argv)
     if(getpid()==pid_pere){
         Signal(SIGCHLD, SIGCHLD_handler);
         Signal(SIGINT, SIGINT_handler);
-        Close(listenfd);
         pause();
         
     }
@@ -77,12 +79,32 @@ int main(int argc, char **argv)
         
         Signal(SIGINT, child_SIGINT_handler);
         while (1) {
-
-            
             while((connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen))<0);
             printf("server connected to client\n");
-            sendfile(connfd);
-            Close(connfd);
+
+            while (connfd!=-1){
+                operation op = recieve_command(connfd);
+                switch(op){
+                    case GET:
+                        sendfile(connfd);
+                        break;
+                    case CLOSE:
+                        Close(connfd);
+                        connfd = -1;
+                        printf("this client is done\n");
+                        break;
+                    case WRONG:
+                        break;
+                    default:
+                        Close(connfd);
+                        connfd = -1;
+                        break;
+                }
+
+            }
+            
+            
+            
         }
     }
 
