@@ -2,7 +2,6 @@
 #include "ftpServerOps.h"
 #include <string.h>
 #define SERVER_DIR "./ftpServerdir/"
-#define BLOCK_SIZE 4096 
 
 operation recieve_command(int clientfd){
     operation op;
@@ -53,22 +52,23 @@ void sendfile(int clientfd){
     int filesize = (int) fileinfo.st_size;
 
     printf("file size:%d\n",filesize);
+    file_buffer = malloc(filesize);
     if((rio_writen(clientfd, &filesize,sizeof(int)))<=0){
         perror("Server filesize writing error");
         goto error;
     }
     
     
-     // Sending file in blocks
-    char buffer[BLOCK_SIZE];
-    int bytes_read;
-    while ((bytes_read = rio_readn(fd, buffer, BLOCK_SIZE)) > 0) {
-        if (rio_writen(clientfd, buffer, bytes_read) <= 0) {
-            perror("Server writing file Error");
-            goto error;
-        }
+    if(rio_readn(fd, file_buffer, filesize) <= 0){
+        perror("Server reading file Error");
+        goto error;
     }
-
+    
+    
+    if(rio_writen(clientfd, file_buffer, fileinfo.st_size)<=0){
+        perror("Server writing file Error");
+        goto error;
+    }
     Close(fd);
 
 

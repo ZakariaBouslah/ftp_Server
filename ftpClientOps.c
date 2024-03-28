@@ -2,8 +2,6 @@
 #include "ftpClientOps.h"
 #include <string.h>
 #define CLIENT_DIR "./ftpClientdir/" 
-#define BLOCK_SIZE 4096 
-
 
 
 void send_command(operation op, int clientfd){
@@ -64,6 +62,11 @@ void recieve_file(char* filename, int clientfd){
     printf("file size: %d bytes\n",filesize);
 
 
+    char* file_buffer = malloc(filesize);
+    if(rio_readn(clientfd,file_buffer,filesize)<=0){
+        perror("Client Reading File Error");
+        return;
+    }
     char *newfilename = malloc(strlen(filename) + strlen("clientCopy_") + strlen(CLIENT_DIR) + 1);
     strcpy(newfilename, CLIENT_DIR);
     strcat(newfilename,"clientCopy_");
@@ -71,23 +74,9 @@ void recieve_file(char* filename, int clientfd){
     
 
     int fd =Open(newfilename,O_CREAT|O_WRONLY,S_IRUSR|S_IWUSR);
-
-    char buffer[BLOCK_SIZE];
-    int bytes_received;
-    int total_bytes_received = 0;
-    while (total_bytes_received < filesize) {
-        int bytes_to_receive = BLOCK_SIZE < (filesize - total_bytes_received) ? BLOCK_SIZE : (filesize - total_bytes_received);        bytes_received = rio_readn(clientfd, buffer, bytes_to_receive);
-        if (bytes_received <= 0) {
-            perror("Client reading file error");
-            Close(fd);
-            return;
-        }
-        if (rio_writen(fd, buffer, bytes_received) <= 0){
-            perror("Client writing file error");
-            Close(fd);
-            return;
-        }
-        total_bytes_received += bytes_received;
+    if((rio_writen(fd, file_buffer, filesize))<=0){
+        perror("Client writing file error");
+        return;
     }
     printf("file %s was recieved in %s\n",filename,newfilename);
     Close(fd);
